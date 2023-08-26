@@ -8,13 +8,17 @@ const getAll = async () => {
 }
 
 const createNew = async (content) => {
-  const getId = () => (100000 * Math.random()).toFixed(0)
-  const object = { content,
-     id: getId(),
-     votes: 0
-      }
+  const object = {
+    content,
+    votes: 0
+  }
   const response = await axios.post(baseUrl, object)
   return response.data
 }
+
+const update = async objectToUpdate => {
+  const response = await axios.put(`${baseUrl}/${objectToUpdate.id}`, objectToUpdate)
+  return response.data
+}
 // eslint-disable-next-line
-export default { getAll, createNew }
+export default { getAll, createNew, update }

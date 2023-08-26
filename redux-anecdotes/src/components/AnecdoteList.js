@@ -1,32 +1,41 @@
 import { useSelector, useDispatch } from "react-redux"
-import { vote } from "../reducers/anecdoteReducer"
-import { newNotification } from "../reducers/notificationReducer"
+import { setNotification } from "../reducers/notificationReducer"
+import { updateVotes } from "../reducers/anecdoteReducer"
 
-export const AnecdoteList = () => {
-  const anecdotes = useSelector((state) => state.notes)
-  const filter = useSelector((state) => state.filter)
+const Anecdote = ({ anecdote }) => {
   const dispatch = useDispatch()
-  const byVotes = (a, b) => b.votes - a.votes
-  const filterFunction = (word) => word.content.toLowerCase().startsWith(filter.toLowerCase())
-  const anecdotesFiltered = anecdotes.filter(filterFunction)
-  const voteHandler = (anecdote) => {
-    dispatch(vote(anecdote.id))
-    dispatch(newNotification(`You voted for '${anecdote.content}'`))
-    setTimeout(() => {
-      dispatch(newNotification(null))
-    }, 5000)
+
+  const voteHandler = () => {
+    dispatch(updateVotes(anecdote))
+    dispatch(setNotification(`You voted for '${anecdote.content}'`, 5))
   }
+
   return (
-    <div>
-      {anecdotesFiltered.sort(byVotes).map((anecdote) => (
-        <div key={anecdote.id}>
-          <div>{anecdote.content}</div>
-          <div>
-            has {anecdote.votes}
-            <button onClick={() => voteHandler(anecdote)}>vote</button>
-          </div>
-        </div>
-      ))}
-    </div>
+  <div>
+      <div>
+          {anecdote.content}
+      </div>
+      <div>
+          has {anecdote.votes}
+          <button onClick={voteHandler}>vote</button>
+      </div>
+  </div>
   )
 }
+
+export const AnecdoteList = () => {  
+const anecdotes = useSelector(({filter, anecdote}) => {
+  if ( filter === null ) {
+    return anecdote
+  }
+  const regex = new RegExp( filter, 'i' )
+  return anecdote.filter(anecdote => anecdote.content.match(regex))
+})
+const byVotes = (b1, b2) => b2.votes - b1.votes
+const anecdotesToShow = [...anecdotes]
+return(
+  anecdotesToShow.sort(byVotes).map(anecdote => <Anecdote key={anecdote.id} anecdote={anecdote} />)
+)
+}
+
+
